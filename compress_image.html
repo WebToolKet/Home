@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebToolket</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #ffffff;
+            color: #333;
+            padding: 15px 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 150px;
+            height: auto;
+        }
+
+        .menu-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu-links a {
+            font-size: 18px;
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s, border-bottom 0.3s;
+        }
+
+        .menu-links a:hover {
+            color: #ba68c8;
+            border-bottom: 2px solid #ba68c8;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+            width: 200px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .dropdown .dropdown-item {
+            display: block;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .dropdown .dropdown-item a {
+            display: block;
+            text-decoration: none;
+            color: #333;
+            transition: color 0.3s;
+        }
+
+        .dropdown .dropdown-item a:hover {
+            color: #ba68c8;
+        }
+
+        .show-dropdown {
+            display: block !important;
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+            color: #333;
+        }
+
+        main {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .main-head {
+            text-align: center;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .content-container h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .content-container p {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .upload-input {
+            display: none;
+        }
+
+        .ad-placeholder {
+            width: 100%;
+            max-width: 1400px;
+            margin: 10px auto;
+            text-align: center;
+            padding: 10px;
+            background-color: #ddd;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .upload-button, .compress-button, .download-button {
+            background-color: #ba68c8;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: background-color 0.3s;
+            margin: 10px;
+        }
+
+        .upload-button:hover, .compress-button:hover, .download-button:hover {
+            background-color: #9c27b0;
+        }
+
+        .compress-button, .download-button {
+            display: none;
+        }
+
+        .download-button {
+            text-decoration: none; /* Remove underline from link */
+            display: inline-block; /* Ensure button styles apply properly */
+        }
+
+        .images-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            width: 90%;
+            max-width: 1400px;
+            margin: 20px auto;
+        }
+
+        .image-card {
+            width: 240px; /* Adjust card size */
+            height: 320px; /* Fixed height for consistency */
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 200px; /* Fixed height for the image */
+            object-fit: contain;
+            margin-bottom: 10px; /* Space between image and name */
+        }
+
+        .image-card p {
+            margin: 0;
+            font-size: 14px;
+            color: #333;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-shadow: none; /* Remove shadow from name */
+            text-align: center;
+            height: 40px; /* Fixed height for name section */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-spinner {
+            display: none;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #ba68c8;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto; /* Center the loading spinner */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px;
+            }
+
+            .logo-container {
+                margin-bottom: 10px;
+            }
+
+            .menu-links {
+                display: none;
+                width: 100%;
+                text-align: left;
+                flex-direction: column;
+            }
+
+            .menu-links.show-menu {
+                display: flex;
+            }
+
+            .menu-links a {
+                margin: 10px 0;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            main {
+                padding: 15px;
+            }
+
+            .button-container {
+                width: 100%;
+            }
+
+            .upload-button, .compress-button, .download-button {
+                width: 100%;
+            }
+
+            .content-container {
+                max-width: 100%;
+            }
+
+            .images-container {
+                gap: 10px;
+                width: 100%;
+            }
+
+            .image-card {
+                width: calc(50% - 20px);
+                height: auto; /* Adjust height for smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo-container">
+                <img src="logo.png" alt="Logo" class="logo">
+            </div>
+            <div class="menu-links">
+                <a href="#">Home</a>
+                <a href="#" class="dropdown-toggle">Tools</a>
+                <div class="dropdown">
+                    <div class="dropdown-content">
+                        <div class="dropdown-item">
+                            <a href="#">Tool 1</a>
+                            <a href="#">Tool 2</a>
+                        </div>
+                    </div>
+                </div>
+                <a href="#">About</a>
+                <a href="#">Contact</a>
+            </div>
+            <div class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="main-head">
+            <div class="content-container">
+                <h1>Compress IMAGE</h1>
+                <p>Compress JPG, PNG, SVG or GIF with the best quality and compression. Reduce the filesize of your images at once.</p>
+            </div>
+        </div>
+        <div class="button-container">
+            <input type="file" id="imageUpload" class="upload-input" accept="image/*" multiple onchange="handleFileUpload()">
+            <button class="upload-button" onclick="document.getElementById('imageUpload').click();">Select Images</button>
+            <button class="compress-button" id="compressButton" onclick="handleCompression()">Compress Images</button>
+            <a class="download-button" id="downloadButton" download="WebToolkit.zip">Download Compressed Images</a>
+            <div class="loading-spinner" id="loadingSpinner"></div>
+        </div>
+        <div class="images-container" id="imagesContainer"></div>
+        <div class="ad-placeholder" id="adPlaceholder">Placeholder for ads or additional content</div>
+    </main>
+
+    <script>
+        const uploadButton = document.querySelector('.upload-button');
+        const compressButton = document.getElementById('compressButton');
+        const downloadButton = document.getElementById('downloadButton');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const imagesContainer = document.getElementById('imagesContainer');
+        const adPlaceholder = document.getElementById('adPlaceholder');
+        let imageFiles = [];
+
+        uploadButton.style.display = 'block'; // Show upload button initially
+        compressButton.style.display = 'none'; // Hide compress button initially
+        downloadButton.style.display = 'none'; // Hide download button initially
+
+        function handleFileUpload() {
+            const files = document.getElementById('imageUpload').files;
+            imageFiles = Array.from(files);
+            imagesContainer.innerHTML = ''; // Clear existing images
+            imageFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = file.name;
+                    const card = document.createElement('div');
+                    card.classList.add('image-card');
+                    card.innerHTML = `
+                        <img src="${e.target.result}" alt="${file.name}">
+                        <p>${file.name.length > 15 ? file.name.slice(0, 15) + '...' : file.name}</p>
+                    `;
+                    imagesContainer.appendChild(card);
+                };
+                reader.readAsDataURL(file);
+            });
+            uploadButton.style.display = 'none'; // Hide upload button
+            compressButton.style.display = 'block'; // Show compress button
+            adPlaceholder.style.display = 'none'; // Hide ad placeholder
+        }
+
+        function handleCompression() {
+            loadingSpinner.style.display = 'block'; // Show loading spinner
+            compressButton.style.display = 'none'; // Hide compress button
+
+            const zip = new JSZip();
+            imageFiles.forEach(file => {
+                zip.file(`WebToolkit_${file.name}`, file); // Prefix filename with "WebToolkit_"
+            });
+
+            zip.generateAsync({ type: "blob" })
+                .then(function(content) {
+                    const blobUrl = URL.createObjectURL(content);
+                    downloadButton.href = blobUrl;
+                    downloadButton.style.display = 'block'; // Show download button
+                    loadingSpinner.style.display = 'none'; // Hide loading spinner
+                })
+                .catch(function(err) {
+                    console.error("Error generating zip file:", err);
+                    loadingSpinner.style.display = 'none'; // Hide loading spinner
+                    compressButton.style.display = 'block'; // Show compress button
+                });
+
+            imageFiles = []; // Clear image files
+            imagesContainer.innerHTML = ''; // Clear images
+            adPlaceholder.style.display = 'block'; // Show ad placeholder
+        }
+    </script>
+</body>
+</html>
